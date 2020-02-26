@@ -2,6 +2,7 @@ package sample;
 
 import java.io.*;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -63,17 +64,17 @@ public class MainViewController {
 
     @FXML
     void onDragDetectSpeedSlider(MouseEvent event) {
-        actualSpeedLabel.setText(actualSpeedText + (int)speedSlider.getValue());
+        updateSpeedLabel();
     }
 
     @FXML
     void onDragDoneSpeedSlider(DragEvent event) {
-        actualSpeedLabel.setText(actualSpeedText + (int)speedSlider.getValue());
+        updateSpeedLabel();
     }
 
     @FXML
     void onMouseClickedSpeedSlider(MouseEvent event) {
-        actualSpeedLabel.setText(actualSpeedText + (int)speedSlider.getValue());
+        updateSpeedLabel();
     }
 
     @FXML
@@ -106,38 +107,28 @@ public class MainViewController {
     void onStartButtonPress(ActionEvent event){
         double timeDelay = 1000/speedSlider.getValue();
         isReading = true;
-        boolean isPlaying = false;
-        if(timeline!=null){
-            try{
-                timeline.play();
-                isPlaying = true;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        if(!isPlaying){
-            timeline = new Timeline(
-                    new KeyFrame(
-                            Duration.millis(timeDelay),
-                            e -> {
-                                if(this.isReading){
-                                    textFlow.getChildren().setAll(textLoader.getColoredTextList(position, Color.RED));
-                                    position++;
-                                    if(position>=textLoader.getColoredTextList(position, Color.RED).size()){
-                                        isReading = false;
-                                    }
+        timeline = new Timeline(
+                new KeyFrame(
+                        Duration.millis(timeDelay),
+                        e -> {
+                            if(this.isReading){
+                                textFlow.getChildren().setAll(textLoader.getColoredTextList(position, Color.RED));
+                                position++;
+                                if(position>=textLoader.getColoredTextList(position, Color.RED).size()){
+                                    isReading = false;
                                 }
                             }
-                    )
-            );
-            timeline.setCycleCount( Animation.INDEFINITE );
-            timeline.playFromStart();
-        }
+                        }
+                )
+        );
+        timeline.setCycleCount( Animation.INDEFINITE );
+        timeline.play();
     }
 
     @FXML
     void onStopButtonPress(ActionEvent event) {
-        timeline.pause();
+        timeline.stop();
+        timeline = null;
         isReading = false;
     }
 
@@ -148,6 +139,7 @@ public class MainViewController {
         textFlow.getChildren().clear();
         textFlow.getChildren().setAll(textLoader.getTextList());
         timeline.stop();
+        timeline = null;
     }
 
     @FXML
@@ -161,5 +153,10 @@ public class MainViewController {
         //assert actualSpeedLabel != null : "fx:id=\"actualSpeedLabel\" was not injected: check your FXML file 'mainView.fxml'.";
         actualSpeedLabel.setText(actualSpeedText + (int)speedSlider.getValue());
 
+    }
+
+    private void updateSpeedLabel(){
+        DecimalFormat df = new DecimalFormat("#.00");
+        actualSpeedLabel.setText(actualSpeedText + df.format(speedSlider.getValue()));
     }
 }
