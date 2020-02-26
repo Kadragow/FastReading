@@ -95,32 +95,6 @@ public class MainViewController {
         for(Text text : textLoader.getTextList()){
             textFlow.getChildren().add(text);
         }
-//        if(file!=null){
-//            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
-//            String loadedText;
-//            StringBuilder textToDisplay = new StringBuilder();
-//            while ((loadedText = bufferedReader.readLine()) != null){
-//                textToDisplay.append(loadedText);
-//            }
-//            String[] words = textToDisplay.toString().split(" ");
-//            for(String word : words){
-//                Text text = new Text(word + " ");
-//                if(word.equals("Lorem"))
-//                    text.setFill(Color.RED);
-//
-//                textFlow.getChildren().add(text);
-//
-//
-//                //textList.add(new Text(word));
-//            }
-//            //setBackgroundColors();
-//            //textToReadArea.setStyle("-fx-control-inner-background:#000000;");
-//            //textToReadArea.setText("gfdsga");
-//            //textToReadArea.setStyle("-fx-control-inner-background:#ffffff;");
-//            //textToReadArea.setText(textToReadArea.getText() + textToDisplay.toString());
-//            //textToReadArea.setStyle("-fx-background-color: blue ");
-//
-//        }
     }
 
     @FXML
@@ -129,36 +103,51 @@ public class MainViewController {
     }
 
     @FXML
-    void onStartButtonPress(ActionEvent event) throws InterruptedException {
+    void onStartButtonPress(ActionEvent event){
+        double timeDelay = 1000/speedSlider.getValue();
         isReading = true;
-        position = 0;
-        timeline = new Timeline(
-                new KeyFrame(
-                        Duration.millis(500),
-                        e -> {
-                            if(this.isReading){
-                                textFlow.getChildren().setAll(textLoader.getColoredTextList(position, Color.RED));
-                                position++;
-                                if(position>50){
-                                    isReading = false;
+        boolean isPlaying = false;
+        if(timeline!=null){
+            try{
+                timeline.play();
+                isPlaying = true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if(!isPlaying){
+            timeline = new Timeline(
+                    new KeyFrame(
+                            Duration.millis(timeDelay),
+                            e -> {
+                                if(this.isReading){
+                                    textFlow.getChildren().setAll(textLoader.getColoredTextList(position, Color.RED));
+                                    position++;
+                                    if(position>=textLoader.getColoredTextList(position, Color.RED).size()){
+                                        isReading = false;
+                                    }
                                 }
                             }
-                        }
-                )
-        );
-        timeline.setCycleCount( Animation.INDEFINITE );
-        timeline.play();
-//        while(position < 5){
-//            textFlow.getChildren().setAll(textLoader.getColoredTextList(position, Color.RED));
-//            Thread.sleep(500);
-//            position++;
-//        }
-
+                    )
+            );
+            timeline.setCycleCount( Animation.INDEFINITE );
+            timeline.playFromStart();
+        }
     }
 
     @FXML
     void onStopButtonPress(ActionEvent event) {
+        timeline.pause();
         isReading = false;
+    }
+
+    @FXML
+    void onResetButtonPress(ActionEvent event){
+        isReading = false;
+        position = 0;
+        textFlow.getChildren().clear();
+        textFlow.getChildren().setAll(textLoader.getTextList());
+        timeline.stop();
     }
 
     @FXML

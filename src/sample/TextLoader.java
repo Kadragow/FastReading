@@ -6,6 +6,7 @@ import javafx.scene.text.Text;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class TextLoader {
@@ -47,7 +48,15 @@ public class TextLoader {
     }
 
     public List<Text> getColoredTextList(int wordIndex, Color textColor){
-        List<Text> tmpTextList = new ArrayList<>(textList);
+        List<Text> tmpTextList = new ArrayList<>();
+        for (int i = 0; i < textList.size(); i++) {
+            Text newText = new Text(textList.get(i).getText());
+            if(i == wordIndex)
+            {
+                newText.setFill(textColor);
+            }
+            tmpTextList.add(newText);
+        }
         tmpTextList.get(wordIndex).setFill(textColor);
         return tmpTextList;
     }
