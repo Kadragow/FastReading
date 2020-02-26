@@ -14,10 +14,7 @@ import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -37,6 +34,7 @@ public class MainViewController {
     private int position;
     private boolean isReading;
     private Timeline timeline;
+    private int acceleration;
 
     @FXML
     private ScrollPane scrollPane;
@@ -63,6 +61,12 @@ public class MainViewController {
     private Label actualSpeedLabel;
 
     @FXML
+    private TextField speedTextField;
+
+    @FXML
+    private TextField fontSize;
+
+    @FXML
     void onDragDetectSpeedSlider(MouseEvent event) {
         updateSpeedLabel();
     }
@@ -75,6 +79,21 @@ public class MainViewController {
     @FXML
     void onMouseClickedSpeedSlider(MouseEvent event) {
         updateSpeedLabel();
+    }
+
+    @FXML
+    void onSpeedTextField(ActionEvent event) {
+        double value = Double.valueOf(speedTextField.getText());
+        if(value>25){
+            value = 25;
+            speedTextField.setText("25");
+        }
+        speedSlider.setValue(value);
+    }
+
+    @FXML
+    void onFontSize(ActionEvent event) {
+        textLoader.changeFontSize(Integer.valueOf(fontSize.getText()));
     }
 
     @FXML
@@ -107,6 +126,10 @@ public class MainViewController {
     void onStartButtonPress(ActionEvent event){
         double timeDelay = 1000/speedSlider.getValue();
         isReading = true;
+        if (timeline!=null){
+            timeline.stop();
+        }
+        acceleration = 101;
         timeline = new Timeline(
                 new KeyFrame(
                         Duration.millis(timeDelay),
@@ -114,8 +137,17 @@ public class MainViewController {
                             if(this.isReading){
                                 textFlow.getChildren().setAll(textLoader.getColoredTextList(position, Color.RED));
                                 position++;
-                                if(position>=textLoader.getColoredTextList(position, Color.RED).size()){
+                                double scrollPos = position * 1.0/textLoader.getTextList().size();
+                                //todo: correct offset
+                                //double scrollOffset = position <= 100 ? scrollPos/acceleration : scrollPos;
+                                //System.out.println(scrollPos + " : " + scrollOffset + " : " + acceleration);
+                                if(acceleration!=1)
+                                    acceleration--;
+                                scrollPane.setVvalue(scrollPos);
+                                if(position>=textLoader.getTextList().size()){
                                     isReading = false;
+                                    timeline.stop();
+                                    timeline = null;
                                 }
                             }
                         }
@@ -127,7 +159,8 @@ public class MainViewController {
 
     @FXML
     void onStopButtonPress(ActionEvent event) {
-        timeline.stop();
+        if(timeline!=null)
+            timeline.stop();
         timeline = null;
         isReading = false;
     }
@@ -138,7 +171,8 @@ public class MainViewController {
         position = 0;
         textFlow.getChildren().clear();
         textFlow.getChildren().setAll(textLoader.getTextList());
-        timeline.stop();
+        if(timeline!=null)
+            timeline.stop();
         timeline = null;
     }
 
@@ -151,12 +185,13 @@ public class MainViewController {
         position = 0;
         //assert speedSlider != null : "fx:id=\"speedSlider\" was not injected: check your FXML file 'mainView.fxml'.";
         //assert actualSpeedLabel != null : "fx:id=\"actualSpeedLabel\" was not injected: check your FXML file 'mainView.fxml'.";
-        actualSpeedLabel.setText(actualSpeedText + (int)speedSlider.getValue());
+        updateSpeedLabel();
 
     }
 
     private void updateSpeedLabel(){
         DecimalFormat df = new DecimalFormat("#.00");
-        actualSpeedLabel.setText(actualSpeedText + df.format(speedSlider.getValue()));
+        speedTextField.setText(df.format(speedSlider.getValue()));
+        //actualSpeedLabel.setText(actualSpeedText + df.format(speedSlider.getValue()));
     }
 }

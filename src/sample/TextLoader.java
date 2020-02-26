@@ -1,6 +1,7 @@
 package sample;
 
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 
@@ -12,8 +13,10 @@ import java.util.List;
 public class TextLoader {
     private File file;
     private List<Text> textList;
+    private String style;
 
     public TextLoader(){
+        style = "";
         textList = new ArrayList<>();
     }
 
@@ -55,9 +58,17 @@ public class TextLoader {
             {
                 newText.setFill(textColor);
             }
+            newText.setStyle(style);
             tmpTextList.add(newText);
         }
         tmpTextList.get(wordIndex).setFill(textColor);
         return tmpTextList;
+    }
+
+    public void changeFontSize(int size){
+        style = "-fx-font: " + size +" arial;";
+        for(Text text : textList){
+            text.setStyle(style);
+        }
     }
 }
