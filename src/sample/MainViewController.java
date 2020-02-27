@@ -34,7 +34,7 @@ public class MainViewController {
     private int position;
     private boolean isReading;
     private Timeline timeline;
-    private int acceleration;
+    private double acceleration;
 
     @FXML
     private ScrollPane scrollPane;
@@ -129,7 +129,7 @@ public class MainViewController {
         if (timeline!=null){
             timeline.stop();
         }
-        acceleration = 101;
+        acceleration = 2;
         timeline = new Timeline(
                 new KeyFrame(
                         Duration.millis(timeDelay),
@@ -137,13 +137,11 @@ public class MainViewController {
                             if(this.isReading){
                                 textFlow.getChildren().setAll(textLoader.getColoredTextList(position, Color.RED));
                                 position++;
-                                double scrollPos = position * 1.0/textLoader.getTextList().size();
-                                //todo: correct offset
-                                //double scrollOffset = position <= 100 ? scrollPos/acceleration : scrollPos;
-                                //System.out.println(scrollPos + " : " + scrollOffset + " : " + acceleration);
-                                if(acceleration!=1)
-                                    acceleration--;
-                                scrollPane.setVvalue(scrollPos);
+                                double scrollPos =position * 1.0/textLoader.getTextList().size();
+                                double scrollOffset =  Math.pow(scrollPos,acceleration);
+                                if(acceleration>1)
+                                    acceleration-=.02;
+                                scrollPane.setVvalue(scrollOffset);
                                 if(position>=textLoader.getTextList().size()){
                                     isReading = false;
                                     timeline.stop();
